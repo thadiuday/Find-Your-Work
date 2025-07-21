@@ -1,36 +1,58 @@
-// Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyBf_rZvgxtviFjdvQgkS8TZIP41xpBppos",
-  authDomain: "find-your-work-5193f.firebaseapp.com",
-  projectId: "find-your-work-5193f",
-  storageBucket: "find-your-work-5193f.appspot.com",
-  messagingSenderId: "519803450809",
-  appId: "1:519803450809:web:3463873c23057865dc6648",
-  measurementId: "G-LJLEJ1FXWE",
-  databaseURL: "https://find-your-work-5193f-default-rtdb.firebaseio.com"
-};
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+  const firebaseConfig = {
+    apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
+    authDomain: "find-your-work-5193f.firebaseapp.com",
+    projectId: "find-your-work-5193f",
+    storageBucket: "find-your-work-5193f.firebasestorage.app",
+    messagingSenderId: "519830450009",
+    appId: "1:519830450009:web:37bc8d0e2f5870fcdc6648",
+    measurementId: "G-6HFHWMG083"
+  };
 
-// Handle form submit
-document.getElementById("postForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const postsRef = ref(db, 'posts/');
 
-  const name = document.getElementById("name").value;
-  const skill = document.getElementById("skill").value;
-  const location = document.getElementById("location").value;
-  const phone = document.getElementById("phone").value;
+  document.getElementById("submitForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const work = document.getElementById("work").value;
+    const phone = document.getElementById("phone").value;
 
-  const newRef = database.ref("posts").push();
-  newRef.set({
-    name,
-    skill,
-    location,
-    phone
+    push(postsRef, {
+      name,
+      work,
+      phone
+    }).then(() => {
+      alert("✅ Post submitted!");
+      e.target.reset();
+    }).catch((error) => {
+      console.error(error);
+      alert("❌ Failed to submit. Check console.");
+    });
   });
 
-  document.getElementById("message").innerText = "✅ Post submitted!";
-  document.getElementById("postForm").reset();
-});
+  // ✅ Listen for new posts and display them
+  onValue(postsRef, (snapshot) => {
+    const postList = document.getElementById("postList");
+    postList.innerHTML = ""; // Clear previous
+
+    snapshot.forEach((childSnapshot) => {
+      const data = childSnapshot.val();
+      const postDiv = document.createElement("div");
+      postDiv.style.marginBottom = "12px";
+      postDiv.style.padding = "10px";
+      postDiv.style.border = "1px solid #ccc";
+      postDiv.style.borderRadius = "8px";
+      postDiv.innerHTML = `
+        <strong>${data.name}</strong><br/>
+        Work: ${data.work}<br/>
+        Phone: ${data.phone}
+      `;
+      postList.appendChild(postDiv);
+    });
+  });
+</script>
