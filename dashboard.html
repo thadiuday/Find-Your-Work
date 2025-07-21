@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Business Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h2 class="text-center mb-4">📊 Business Dashboard</h2>
+
+    <form id="workerForm" class="mb-4">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input type="text" id="workerName" class="form-control" placeholder="Worker Name" required />
+        </div>
+        <div class="col-md-4">
+          <input type="number" id="paymentAmount" class="form-control" placeholder="Payment Amount (₹)" required />
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-success w-100" type="submit">Add Payment</button>
+        </div>
+      </div>
+    </form>
+
+    <h4>💼 Worker Payment Records</h4>
+    <div id="workerList" class="mt-3"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getDatabase, ref, push, onValue
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
+      authDomain: "find-your-work-5193f.firebaseapp.com",
+      databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "find-your-work-5193f",
+      storageBucket: "find-your-work-5193f.appspot.com",
+      messagingSenderId: "519830450009",
+      appId: "1:519830450009:web:37bc8d0e2f5870fcdc6648"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const paymentsRef = ref(db, "payments");
+
+    const form = document.getElementById("workerForm");
+    const list = document.getElementById("workerList");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("workerName").value;
+      const amount = document.getElementById("paymentAmount").value;
+
+      push(paymentsRef, {
+        name,
+        amount,
+        paidOn: new Date().toLocaleDateString()
+      });
+
+      form.reset();
+    });
+
+    onValue(paymentsRef, (snapshot) => {
+      list.innerHTML = "";
+      const data = snapshot.val();
+      if (data) {
+        Object.values(data).forEach(payment => {
+          const div = document.createElement("div");
+          div.className = "alert alert-info";
+          div.innerHTML = `<strong>${payment.name}</strong> was paid ₹${payment.amount} on ${payment.paidOn}`;
+          list.appendChild(div);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
