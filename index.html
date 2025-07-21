@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Find Your Work</title>
   <style>
     body {
-      font-family: sans-serif;
-      max-width: 500px;
+      font-family: Arial, sans-serif;
+      max-width: 600px;
       margin: 40px auto;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    h2 {
+    h2, h3 {
       text-align: center;
     }
     input, button {
-      display: block;
-      margin: 10px 0;
-      padding: 10px;
       width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
       font-size: 1em;
     }
     button {
-      background: #007bff;
+      background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
     }
     button:hover {
-      background: #0056b3;
+      background-color: #0056b3;
+    }
+    #postList div {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
+
   <h2>Post a Job or Find Work</h2>
 
   <form id="submitForm">
@@ -43,12 +48,13 @@
     <button type="submit">Submit Post</button>
   </form>
 
-  <script type="module">
-    // Firebase imports from CDN
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  <h3>Latest Posts</h3>
+  <div id="postList"></div>
 
-    // ✅ Your Firebase config
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
       authDomain: "find-your-work-5193f.firebaseapp.com",
@@ -59,32 +65,45 @@
       measurementId: "G-6HFHWMG083"
     };
 
-    // ✅ Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const postsRef = ref(db, 'posts/');
 
-    // ✅ Handle form submit
     document.getElementById("submitForm").addEventListener("submit", function (e) {
       e.preventDefault();
-      const name = document.getElementById("name").value;
-      const work = document.getElementById("work").value;
-      const phone = document.getElementById("phone").value;
+      const name = document.getElementById("name").value.trim();
+      const work = document.getElementById("work").value.trim();
+      const phone = document.getElementById("phone").value.trim();
 
-      push(ref(db, 'posts/'), {
-        name,
-        work,
-        phone
-      }).then(() => {
-        alert("✅ Post submitted!");
-        e.target.reset();
-      }).catch((error) => {
-        console.error(error);
-        alert("❌ Failed to submit. Check console.");
+      if (name && work && phone) {
+        push(postsRef, { name, work, phone })
+          .then(() => {
+            alert("✅ Post submitted!");
+            e.target.reset();
+          })
+          .catch((error) => {
+            console.error("Error submitting:", error);
+            alert("❌ Submission failed. Check console.");
+          });
+      }
+    });
+
+    onValue(postsRef, (snapshot) => {
+      const postList = document.getElementById("postList");
+      postList.innerHTML = "";
+
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <strong>${data.name}</strong><br>
+          Work: ${data.work}<br>
+          Phone: ${data.phone}
+        `;
+        postList.appendChild(div);
       });
     });
-    <h3>Latest Posts</h3>
-<div id="postList"></div>
-
   </script>
+
 </body>
 </html>
