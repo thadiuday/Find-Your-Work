@@ -44,22 +44,32 @@
     #search {
       border-radius: 12px;
     }
+
+    .top-buttons {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      z-index: 1000;
+    }
+
+    .top-buttons a {
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
 
-<div class="container py-5">
-  <!-- Chat Button -->
-  <div class="d-flex justify-content-end mb-3">
-    <a href="chat.html" class="btn btn-light">💬 Chat</a>
-  </div>
+<!-- Chat & Dashboard Buttons -->
+<div class="top-buttons">
+  <a href="chat.html" class="btn btn-light">💬 Chat</a>
+  <a href="dashboard.html" class="btn btn-dark">📊 Business Dashboard</a>
+</div>
 
+<div class="container py-5">
   <h1 class="text-center mb-4">Find Your Work</h1>
 
-  <!-- Search Input -->
   <input type="text" id="search" class="form-control mb-4" placeholder="🔍 Search type of work...">
 
-  <!-- Form -->
   <div class="form-container mb-5">
     <form id="postForm">
       <div class="mb-3">
@@ -82,15 +92,13 @@
         <label class="form-label">Phone Number</label>
         <input type="tel" id="phone" class="form-control" required />
       </div>
-      <input type="hidden" id="editingId" />
-      <button type="submit" class="btn btn-primary w-100" id="submitBtn">Submit Post</button>
+      <button type="submit" class="btn btn-primary w-100">Submit Post</button>
     </form>
   </div>
 
-  <!-- Posts Section -->
   <h3 class="mb-3">Latest Posts</h3>
-  <div
-
+  <div id="posts"></div>
+</div>
 
 <script type="module" src="app.js"></script>
 </body>
