@@ -4,12 +4,10 @@ import {
   ref,
   push,
   onValue,
-  set,
   remove,
   update
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
   authDomain: "find-your-work-5193f.firebaseapp.com",
@@ -28,107 +26,94 @@ const postsRef = ref(db, "posts");
 const form = document.getElementById("postForm");
 const postsContainer = document.getElementById("posts");
 const searchInput = document.getElementById("search");
+const editingIdInput = document.getElementById("editingId");
+const submitBtn = document.getElementById("submitBtn");
+
+let allPosts = [];
+
+onValue(postsRef, (snapshot) => {
+  const data = snapshot.val();
+  allPosts = data ? Object.entries(data).map(([id, value]) => ({ id, ...value })) : [];
+  renderPosts();
+});
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-
   const name = document.getElementById("name").value;
   const role = document.getElementById("role").value;
   const work = document.getElementById("work").value;
   const phone = document.getElementById("phone").value;
-  const timestamp = Date.now();
+  const editingId = editingIdInput.value;
 
-  push(postsRef, {
-    name,
-    role,
-    work,
-    phone,
-    timestamp
-  }).then(() => {
-    alert("✅ Post submitted!");
-    form.reset();
-  }).catch((err) => console.error("Error:", err));
-});
-
-// Display Posts
-onValue(postsRef, (snapshot) => {
-  postsContainer.innerHTML = "";
-  const data = snapshot.val();
-  if (data) {
-    const posts = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-
-    // Sort by newest
-    posts.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Filter by search
-    const keyword = searchInput.value.toLowerCase();
-    const filtered = posts.filter(post => post.work.toLowerCase().includes(keyword));
-
-    filtered.forEach(post => {
-      const div = document.createElement("div");
-      div.className = "post card mb-2";
-      div.innerHTML = `
-        <div class="card-body">
-          <h5 class="card-title">${post.name} (${post.role})</h5>
-          <p class="card-text">
-            Work: ${post.work}<br/>
-            Phone: ${post.phone}<br/>
-            <small class="text-muted">${new Date(post.timestamp).toLocaleString()}</small>
-          </p>
-          <button class="btn btn-sm btn-warning me-2" onclick="editPost('${post.id}')">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deletePost('${post.id}')">Delete</button>
-        </div>
-      `;
-      postsContainer.appendChild(div);
+  if (editingId) {
+    const postRef = ref(db, `posts/${editingId}`);
+    update(postRef, { name, role, work, phone }).then(() => {
+      alert("✅ Post updated.");
+      resetForm();
     });
   } else {
-    postsContainer.innerHTML = "<p class='text-muted'>No posts found.</p>";
+    const timestamp = Date.now();
+    push(postsRef, { name, role, work, phone, timestamp }).then(() => {
+      alert("✅ Post submitted!");
+      resetForm();
+    });
   }
 });
 
-// Real-time search
-searchInput.addEventListener("input", () => {
-  onValue(postsRef, () => {}); // Triggers re-render
-});
+searchInput.addEventListener("input", renderPosts);
 
-// Delete function
+function renderPosts() {
+  const keyword = searchInput.value.toLowerCase();
+  postsContainer.innerHTML = "";
+
+  const filtered = allPosts
+    .filter(post => post.work.toLowerCase().includes(keyword))
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  if (filtered.length === 0) {
+    postsContainer.innerHTML = "<p class='text-muted'>No posts found.</p>";
+    return;
+  }
+
+  filtered.forEach(post => {
+    const div = document.createElement("div");
+    div.className = "post card mb-2";
+    div.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title">${post.name} (${post.role})</h5>
+        <p class="card-text">
+          Work: ${post.work}<br/>
+          Phone: ${post.phone}<br/>
+          <small class="text-muted">${new Date(post.timestamp).toLocaleString()}</small>
+        </p>
+        <button class="btn btn-sm btn-warning me-2" onclick="editPost('${post.id}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePost('${post.id}')">Delete</button>
+      </div>
+    `;
+    postsContainer.appendChild(div);
+  });
+}
+
 window.deletePost = (id) => {
   if (confirm("Are you sure you want to delete this post?")) {
     remove(ref(db, `posts/${id}`));
   }
 };
 
-// Edit function
 window.editPost = (id) => {
-  const postRef = ref(db, `posts/${id}`);
-  onValue(postRef, (snapshot) => {
-    const post = snapshot.val();
-    if (post) {
-      document.getElementById("name").value = post.name;
-      document.getElementById("role").value = post.role;
-      document.getElementById("work").value = post.work;
-      document.getElementById("phone").value = post.phone;
-      form.removeEventListener("submit", addPostHandler);
-      form.onsubmit = (e) => {
-        e.preventDefault();
-        update(postRef, {
-          name: document.getElementById("name").value,
-          role: document.getElementById("role").value,
-          work: document.getElementById("work").value,
-          phone: document.getElementById("phone").value
-        }).then(() => {
-          alert("✅ Post updated.");
-          form.reset();
-          form.onsubmit = addPostHandler;
-        });
-      };
-    }
-  }, { onlyOnce: true });
+  const post = allPosts.find(p => p.id === id);
+  if (post) {
+    document.getElementById("name").value = post.name;
+    document.getElementById("role").value = post.role;
+    document.getElementById("work").value = post.work;
+    document.getElementById("phone").value = post.phone;
+    editingIdInput.value = post.id;
+    submitBtn.textContent = "Update Post";
+  }
 };
 
-// Default add handler
-const addPostHandler = (e) => {
-  e.preventDefault();
-  form.dispatchEvent(new Event("submit"));
-};
-form.addEventListener("submit", addPostHandler);
+function resetForm() {
+  form.reset();
+  editingIdInput.value = "";
+  submitBtn.textContent = "Submit Post";
+}
