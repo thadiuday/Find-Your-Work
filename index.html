@@ -71,10 +71,6 @@
         <input type="text" id="name" class="form-control" required />
       </div>
       <div class="mb-3">
-        <label class="form-label">Profile Picture (optional)</label>
-        <input type="url" id="profilePic" class="form-control" placeholder="Paste Image URL here" />
-      </div>
-      <div class="mb-3">
         <label class="form-label">Role</label>
         <select id="role" class="form-select" required>
           <option value="">Select Role</option>
@@ -107,7 +103,7 @@
     div.className = "post card mb-3";
     div.innerHTML = `
       <div class="card-body d-flex align-items-start">
-        <img src="${post.profilePic || 'https://via.placeholder.com/50'}" class="rounded-circle me-3" width="50" height="50" alt="Profile">
+        <img src="https://via.placeholder.com/50/007cf0/ffffff?text=👤" class="rounded-circle me-3" width="50" height="50" alt="Profile">
         <div class="flex-grow-1">
           <h5 class="card-title mb-1">${post.name} (${post.role})</h5>
           <p class="card-text mb-1">
