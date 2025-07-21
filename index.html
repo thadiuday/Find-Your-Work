@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find Your Work</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Find Your Work</h1>
+    <input type="text" id="search" placeholder="Search by skill..." />
+    <ul id="job-list">
+      <li>Web Developer - HTML, CSS, JS</li>
+      <li>Graphic Designer - Photoshop, Illustrator</li>
+      <li>Data Analyst - Python, SQL</li>
+      <li>Content Writer - SEO, Blogging</li>
+    </ul>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('search');
+    const jobList = document.getElementById('job-list');
+
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      const jobs = jobList.getElementsByTagName('li');
+
+      Array.from(jobs).forEach(job => {
+        const text = job.textContent.toLowerCase();
+        job.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
