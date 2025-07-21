@@ -1,70 +1,58 @@
-// Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ✅ Correct Firebase configuration
+// ✅ Your Firebase config with correct DB URL
 const firebaseConfig = {
   apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
   authDomain: "find-your-work-5193f.firebaseapp.com",
-  databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app", // ✅ Correct!
+  databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "find-your-work-5193f",
   storageBucket: "find-your-work-5193f.appspot.com",
   messagingSenderId: "519830450009",
   appId: "1:519830450009:web:37bc8d0e2f5870fcdc6648",
   measurementId: "G-6HFHWMG083"
 };
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const postsRef = ref(db, "posts");
 
-// Handle form submission
-const form = document.getElementById("submitForm");
+const form = document.getElementById("postForm");
+const postsContainer = document.getElementById("posts");
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("name").value.trim();
-  const work = document.getElementById("work").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const name = document.getElementById("name").value;
+  const work = document.getElementById("work").value;
+  const phone = document.getElementById("phone").value;
 
-  if (!name || !work || !phone) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  const postData = { name, work, phone };
-
-  // ✅ Write to Firebase
-  push(postsRef, postData)
-    .then(() => {
-      alert("Post submitted successfully!");
+  if (name && work && phone) {
+    push(postsRef, {
+      name,
+      work,
+      phone
+    }).then(() => {
+      alert("✅ Post submitted!");
       form.reset();
-    })
-    .catch((error) => {
-      console.error("Firebase Write Error:", error);
-      alert("Error submitting post: " + error.message);
+    }).catch((error) => {
+      console.error("❌ Error submitting post:", error);
     });
+  }
 });
 
-// ✅ Read & display posts
+// Show existing posts
 onValue(postsRef, (snapshot) => {
-  const postList = document.getElementById("postList");
-  postList.innerHTML = ""; // Clear previous posts
-
-  if (!snapshot.exists()) {
-    postList.innerHTML = "<p>No posts yet.</p>";
-    return;
+  postsContainer.innerHTML = "";
+  const data = snapshot.val();
+  if (data) {
+    Object.values(data).reverse().forEach(post => {
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `<strong>${post.name}</strong><br>Work: ${post.work}<br>Phone: ${post.phone}`;
+      postsContainer.appendChild(div);
+    });
+  } else {
+    postsContainer.innerHTML = "<p>No posts yet.</p>";
   }
-
-  snapshot.forEach((child) => {
-    const post = child.val();
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <strong>${post.name}</strong><br>
-      Work: ${post.work}<br>
-      Phone: ${post.phone}<br><br>
-    `;
-    postList.appendChild(div);
-  });
 });
