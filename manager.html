@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Workers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container py-5">
+  <h2 class="mb-4">👨‍💼 Worker Management</h2>
+
+  <form id="workerForm" class="row g-3 mb-4">
+    <div class="col-md-4">
+      <input type="text" class="form-control" id="workerName" placeholder="Worker Name" required />
+    </div>
+    <div class="col-md-4">
+      <input type="number" class="form-control" id="workerPayment" placeholder="Amount (₹)" required />
+    </div>
+    <div class="col-md-4 d-grid">
+      <button type="submit" class="btn btn-success">Add Worker</button>
+    </div>
+  </form>
+
+  <div id="workerList"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    onValue,
+    update,
+    remove
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
+    authDomain: "find-your-work-5193f.firebaseapp.com",
+    databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "find-your-work-5193f",
+    storageBucket: "find-your-work-5193f.appspot.com",
+    messagingSenderId: "519830450009",
+    appId: "1:519830450009:web:37bc8d0e2f5870fcdc6648",
+    measurementId: "G-6HFHWMG083"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const workersRef = ref(db, "workers");
+
+  const form = document.getElementById("workerForm");
+  const list = document.getElementById("workerList");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("workerName").value;
+    const payment = document.getElementById("workerPayment").value;
+    push(workersRef, {
+      name,
+      payment,
+      paid: false
+    }).then(() => form.reset());
+  });
+
+  onValue(workersRef, (snapshot) => {
+    list.innerHTML = "";
+    const data = snapshot.val();
+    if (data) {
+      Object.entries(data).forEach(([id, worker]) => {
+        const div = document.createElement("div");
+        div.className = "card mb-2";
+        div.innerHTML = `
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h5>${worker.name}</h5>
+              <p>Payment: ₹${worker.payment} - <strong>${worker.paid ? "Paid" : "Unpaid"}</strong></p>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-${worker.paid ? "secondary" : "success"} me-2"
+                onclick="togglePaid('${id}', ${!worker.paid})">
+                Mark as ${worker.paid ? "Unpaid" : "Paid"}
+              </button>
+              <button class="btn btn-sm btn-danger" onclick="deleteWorker('${id}')">Delete</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+  });
+
+  window.togglePaid = (id, paid) => {
+    update(ref(db, `workers/${id}`), { paid });
+  };
+
+  window.deleteWorker = (id) => {
+    if (confirm("Delete this worker?")) {
+      remove(ref(db, `workers/${id}`));
+    }
+  };
+</script>
+</body>
+</html>
