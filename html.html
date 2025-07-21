@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Find Your Work</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Find Your Work</h1>
+
+    <form id="postForm">
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="text" id="skill" placeholder="Skill (e.g., Plumber)" required />
+      <input type="text" id="location" placeholder="Location" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+      <button type="submit">Post Your Work</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script src="app.js"></script>
+  </body>
+</html>
