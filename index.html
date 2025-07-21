@@ -1,31 +1,79 @@
-<script type="module">
-  // Import the functions you need from the SDKs
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find Your Work</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      font-size: 1em;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Post a Job or Find Work</h2>
+  <form id="submitForm">
+    <input type="text" id="name" placeholder="Your Name" required />
+    <input type="text" id="work" placeholder="Type of Work" required />
+    <input type="text" id="phone" placeholder="Phone Number" required />
+    <button type="submit">Submit Post</button>
+  </form>
 
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-  // Form handling
-  document.getElementById('submitForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('name').value;
-    const work = document.getElementById('work').value;
-    const phone = document.getElementById('phone').value;
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    push(ref(db, 'posts/'), { name, work, phone });
-    alert('✅ Post submitted!');
-    e.target.reset();
-  });
-</script>
+    document.getElementById("submitForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const work = document.getElementById("work").value;
+      const phone = document.getElementById("phone").value;
+
+      push(ref(db, 'posts/'), {
+        name,
+        work,
+        phone
+      }).then(() => {
+        alert("✅ Post submitted!");
+        e.target.reset();
+      }).catch((error) => {
+        console.error(error);
+        alert("⚠️ Failed to submit post.");
+      });
+    });
+  </script>
+</body>
+</html>
