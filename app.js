@@ -6,14 +6,13 @@ import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebas
 const firebaseConfig = {
   apiKey: "AIzaSyBf_rZvgtxviFjdvQgkS8T2IP41xpBppos",
   authDomain: "find-your-work-5193f.firebaseapp.com",
-  databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://find-your-work-5193f-default-rtdb.asia-southeast1.firebasedatabase.app", // ✅ Correct!
   projectId: "find-your-work-5193f",
   storageBucket: "find-your-work-5193f.appspot.com",
   messagingSenderId: "519830450009",
   appId: "1:519830450009:web:37bc8d0e2f5870fcdc6648",
   measurementId: "G-6HFHWMG083"
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
